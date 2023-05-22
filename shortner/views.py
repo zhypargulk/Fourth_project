@@ -7,13 +7,24 @@ from django.http import HttpResponse
 def index(request):
     return render(request, 'index.html')
 
+
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
+
+@csrf_exempt
 def create(request):
     if request.method == 'POST':
-        link = request.POST['link']
-        uid = str(uuid.uuid4())[:5]
-        new_url = Url(link=link,uuid=uid)
-        new_url.save()
-        return HttpResponse(uid)
+        link = request.POST.get('link')
+
+        if link:
+            uid = str(uuid.uuid4())[:5]
+            new_url = Url(link=link, uuid=uid)
+            new_url.save()
+            return HttpResponse(uid)
+        else:
+            return HttpResponse("Missing 'link' parameter", status=400)
+
 
 def go(request, pk):
     url_details = Url.objects.get(uuid=pk)
